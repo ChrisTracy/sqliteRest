@@ -43,7 +43,8 @@ async def dynamic_query(table_name, conditions, limit=return_item_limit):
                 query_conditions.append(f"LOWER({column}) = ?")
                 values.append(value.lower())
 
-        query = f"SELECT * FROM {table_name} WHERE {' AND '.join(query_conditions)} LIMIT ?"
+        query = f"SELECT * FROM {table_name} WHERE {' AND '.join(query_conditions)}"
+        query += f" LIMIT ?"
 
         # Use parameterized query to prevent SQL injection
         await cursor.execute(query, (*values, limit))
