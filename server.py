@@ -21,7 +21,7 @@ db_name = os.environ.get('DB_NAME', 'db')
 return_item_limit = int(os.environ.get('RETURN_ITEM_LIMIT', '500'))
 
 # Full path to the SQLite database file in the Documents folder
-database_path = f"/app/db/{db_name}.sqlite"
+database_path = f"/databases/{db_name}.sqlite"
 
 # Check if the database file exists before proceeding
 if not os.path.exists(database_path):
