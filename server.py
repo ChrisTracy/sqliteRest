@@ -35,8 +35,7 @@ async def dynamic_query(table_name, conditions, limit=return_item_limit):
         query_conditions = []
         values = []
 
-        for condition in conditions.split(','):
-            column, value = condition.split(':')
+        for column, value in conditions.items():
             if '*' in value:
                 query_conditions.append(f"LOWER({column}) LIKE ?")
                 values.append(f'%{value.replace("*", "").lower()}%')
@@ -57,11 +56,11 @@ async def dynamic_query(table_name, conditions, limit=return_item_limit):
     return result_as_json
 
 @app.get("/api/{table_name}")
-async def read_item(table_name: str, conditions: Optional[str] = Query(None)):
+async def read_item(table_name: str, conditions: dict = Query({})):
     try:
         result = await dynamic_query(table_name, conditions)
-        logging.info(f"Query successful for table '{table_name}' with conditions '{conditions}'")
+        logging.info(f"Query successful for table '{table_name}' with conditions {conditions}")
         return result
     except Exception as e:
-        logging.error(f"Error processing query for table '{table_name}' with conditions '{conditions}': {str(e)}")
+        logging.error(f"Error processing query for table '{table_name}' with conditions {conditions}: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
