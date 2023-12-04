@@ -56,11 +56,11 @@ async def dynamic_query(table_name, conditions, limit=return_item_limit):
     return result_as_json
 
 @app.get("/api/{table_name}")
-async def read_item(table_name: str, conditions: dict = Query({})):
+async def read_item(table_name: str, params: Dict[str, Optional[str]] = {}):
     try:
-        result = await dynamic_query(table_name, conditions)
-        logging.info(f"Query successful for table '{table_name}' with conditions {conditions}")
+        result = await dynamic_query(table_name, params)
+        logging.info(f"Query successful for table '{table_name}' with conditions {params}")
         return result
     except Exception as e:
-        logging.error(f"Error processing query for table '{table_name}' with conditions {conditions}: {str(e)}")
+        logging.error(f"Error processing query for table '{table_name}' with conditions {params}: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
