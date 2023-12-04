@@ -44,6 +44,8 @@ async def dynamic_query(table_name, conditions, limit=return_item_limit):
                 values.append(value.lower())
 
         query = f"SELECT * FROM {table_name} WHERE {' AND '.join(query_conditions)}"
+
+        # Append the LIMIT clause at the end
         query += f" LIMIT ?"
 
         # Use parameterized query to prevent SQL injection
@@ -57,9 +59,9 @@ async def dynamic_query(table_name, conditions, limit=return_item_limit):
     return result_as_json
 
 @app.get("/api/{table_name}")
-async def read_item(table_name: str, params: Dict[str, Optional[str]] = {}):
+async def read_item(table_name: str, params: Dict[str, Optional[str]] = Query({}), limit: int = Query(return_item_limit)):
     try:
-        result = await dynamic_query(table_name, params)
+        result = await dynamic_query(table_name, params, limit)
         logging.info(f"Query successful for table '{table_name}' with conditions {params}")
         return result
     except Exception as e:
