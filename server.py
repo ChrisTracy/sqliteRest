@@ -1,5 +1,5 @@
 from fastapi import FastAPI, HTTPException, Query
-from typing import Optional
+from typing import Optional, Dict
 import aiosqlite
 import os
 import sys
