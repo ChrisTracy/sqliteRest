@@ -1,5 +1,6 @@
-from fastapi import FastAPI, HTTPException, Query
-from typing import Optional
+from fastapi import FastAPI, HTTPException
+from typing import Optional, Dict
+from fastapi import Request
 import aiosqlite
 import os
 import sys
@@ -21,7 +22,7 @@ db_name = os.environ.get('DB_NAME', 'db')
 return_item_limit = int(os.environ.get('RETURN_ITEM_LIMIT', '500'))
 
 # Full path to the SQLite database file in the Documents folder
-database_path = f"/app/db/{db_name}.sqlite"
+database_path = f"/databases/{db_name}.sqlite"
 
 # Check if the database file exists before proceeding
 if not os.path.exists(database_path):
@@ -35,8 +36,7 @@ async def dynamic_query(table_name, conditions, limit=return_item_limit):
         query_conditions = []
         values = []
 
-        for condition in conditions.split(','):
-            column, value = condition.split(':')
+        for column, value in conditions.items():
             if '*' in value:
                 query_conditions.append(f"LOWER({column}) LIKE ?")
                 values.append(f'%{value.replace("*", "").lower()}%')
@@ -44,7 +44,8 @@ async def dynamic_query(table_name, conditions, limit=return_item_limit):
                 query_conditions.append(f"LOWER({column}) = ?")
                 values.append(value.lower())
 
-        query = f"SELECT * FROM {table_name} WHERE {' AND '.join(query_conditions)} LIMIT ?"
+        query = f"SELECT * FROM {table_name} WHERE {' AND '.join(query_conditions)}"
+        query += f" LIMIT ?"
 
         # Use parameterized query to prevent SQL injection
         await cursor.execute(query, (*values, limit))
@@ -57,11 +58,12 @@ async def dynamic_query(table_name, conditions, limit=return_item_limit):
     return result_as_json
 
 @app.get("/api/{table_name}")
-async def read_item(table_name: str, conditions: Optional[str] = Query(None)):
+async def read_item(table_name: str, request: Request, limit: int = return_item_limit):
     try:
-        result = await dynamic_query(table_name, conditions)
-        logging.info(f"Query successful for table '{table_name}' with conditions '{conditions}'")
+        params = dict(request.query_params)
+        result = await dynamic_query(table_name, params, limit)
+        logging.info(f"Query successful for table '{table_name}' with conditions {params}")
         return result
     except Exception as e:
-        logging.error(f"Error processing query for table '{table_name}' with conditions '{conditions}': {str(e)}")
+        logging.error(f"Error processing query for table '{table_name}' with conditions {params}: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
