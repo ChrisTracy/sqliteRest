@@ -29,7 +29,7 @@ if not os.path.exists(database_path):
     raise FileNotFoundError(f"The database file '{database_path}' does not exist.")
     sys.exit(1)
 
-async def dynamic_query(table_name, conditions, limit=return_item_limit):
+async def dynamic_query(table_name, conditions, limit=return_item_limit, all_fields=False):
     async with aiosqlite.connect(database_path) as conn:
         cursor = await conn.cursor()
 
@@ -53,15 +53,18 @@ async def dynamic_query(table_name, conditions, limit=return_item_limit):
         columns = [desc[0] for desc in cursor.description]
         result = await cursor.fetchall()
 
-        result_as_json = [dict(zip(columns, row)) for row in result]
+        if all_fields:
+            result_as_json = [dict(zip(columns, row)) for row in result]
+        else:
+            result_as_json = [dict((k, v) for k, v in zip(columns, row) if v) for row in result]
 
     return result_as_json
 
 @app.get("/api/{table_name}")
-async def read_item(table_name: str, request: Request):
+async def read_item(table_name: str, request: Request, all_fields: Optional[bool] = False):
     try:
         params = dict(request.query_params)
-        result = await dynamic_query(table_name, params)
+        result = await dynamic_query(table_name, params, all_fields=all_fields)
         logging.info(f"Query successful for table '{table_name}' with conditions {params}")
         return result
     except Exception as e:
