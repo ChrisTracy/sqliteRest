@@ -58,10 +58,10 @@ async def dynamic_query(table_name, conditions, limit=return_item_limit):
     return result_as_json
 
 @app.get("/api/{table_name}")
-async def read_item(table_name: str, request: Request, limit: int = return_item_limit):
+async def read_item(table_name: str, request: Request):
     try:
         params = dict(request.query_params)
-        result = await dynamic_query(table_name, params, limit)
+        result = await dynamic_query(table_name, params)
         logging.info(f"Query successful for table '{table_name}' with conditions {params}")
         return result
     except Exception as e:
