@@ -64,7 +64,10 @@ async def dynamic_query(table_name, conditions, limit=return_item_limit, all_fie
 
     except Exception as e:
         logging.error(f"Error processing query for table '{table_name}' with conditions {conditions}: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
+        if "no such column" in str(e).lower() or "no such table" in str(e).lower():
+            raise HTTPException(status_code=400, detail=str(e))
+        else:
+            raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/api/{table_name}")
 async def read_item(table_name: str, request: Request):
