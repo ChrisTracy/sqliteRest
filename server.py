@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Response
+from fastapi import FastAPI, HTTPException, Response, status
 from typing import Optional, Dict
 from fastapi import Request
 from fastapi.responses import JSONResponse
@@ -75,6 +75,10 @@ async def read_item(table_name: str, request: Request):
         params = dict(request.query_params)
         all_fields = params.pop("all_fields", False)  # Remove and get the value of all_fields
         result = await dynamic_query(table_name, params, all_fields=all_fields)
+        
+        if not result["data"]:
+            raise HTTPException(status_code=404, detail=f"No data found for table '{table_name}' with conditions {params}")
+
         logging.info(f"Query successful for table '{table_name}' with conditions {params}")
         return JSONResponse(content=result)
 
