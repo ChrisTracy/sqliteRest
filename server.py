@@ -1,6 +1,7 @@
 from fastapi import FastAPI, HTTPException, Response
 from typing import Optional, Dict
 from fastapi import Request
+from fastapi.responses import JSONResponse
 import aiosqlite
 import os
 import sys
@@ -72,8 +73,8 @@ async def read_item(table_name: str, request: Request):
         all_fields = params.pop("all_fields", False)  # Remove and get the value of all_fields
         result = await dynamic_query(table_name, params, all_fields=all_fields)
         logging.info(f"Query successful for table '{table_name}' with conditions {params}")
-        return Response(content=result, media_type="application/json")
+        return JSONResponse(content=result)
 
     except HTTPException as http_exc:
         # If HTTPException is raised, reformat the response
-        return Response(content={"status_code": http_exc.status_code, "message": http_exc.detail}, media_type="application/json")
+        return JSONResponse(content={"status_code": http_exc.status_code, "message": http_exc.detail})
