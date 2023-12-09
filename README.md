@@ -1,4 +1,15 @@
 # sqliteRest
+This project is a simple Fast API endpoint that sits directly on top of a sqlite database file. In its current capacity, items can only be read from the database.
+
+## Examples
+Use the table name in the route and then define all queries after the '?'. Every column in the database can be queried and wilcards (*) are allowed.
+```http
+GET /api/{table_name}?field1=value*&field2=value2
+```
+By defualt, the api only returns fields that are not empty. If you want to return all fields, use the all_fields parameter.
+```http
+GET /api/{table_name}?field1=value&field2=value2&all_fields=true
+```
 
 ## Quick Setup
 
