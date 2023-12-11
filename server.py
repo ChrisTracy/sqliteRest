@@ -2,6 +2,7 @@ from fastapi import FastAPI, HTTPException, Response, status
 from typing import Optional, Dict
 from fastapi import Request
 from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 import aiosqlite
 import os
 import sys
@@ -68,6 +69,18 @@ async def dynamic_query(table_name, conditions, limit=return_item_limit, all_fie
             raise HTTPException(status_code=400, detail=str(e))
         else:
             raise HTTPException(status_code=500, detail=str(e))
+
+origins = [
+   "*"
+]
+
+app.add_middleware(
+   CORSMiddleware,
+   allow_origins=origins,
+   allow_credentials=True,
+   allow_methods=["GET"],
+   allow_headers=["*"],  # You can specify specific headers here for added security
+)
 
 @app.get("/api/{table_name}")
 async def read_item(table_name: str, request: Request):
