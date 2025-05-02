@@ -3,6 +3,7 @@ from typing import Optional, Dict
 from fastapi import Request
 from fastapi.responses import JSONResponse
 import aiosqlite
+import uvicorn
 import os
 import sys
 import logging
