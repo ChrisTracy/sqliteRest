@@ -85,3 +85,8 @@ async def read_item(table_name: str, request: Request):
     except HTTPException as http_exc:
         # If HTTPException is raised, reformat the response
         return JSONResponse(content={"status_code": http_exc.status_code, "message": http_exc.detail})
+
+if __name__ == "__main__":
+    host = os.getenv("HOST", "0.0.0.0")
+    port = int(os.getenv("PORT", 8001))
+    uvicorn.run("server:app", host=host, port=port)
